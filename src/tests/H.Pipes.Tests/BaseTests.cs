@@ -6,6 +6,8 @@ namespace H.Pipes.Tests;
 
 public static class BaseTests
 {
+    private static int _pipeNameSequence;
+
     public static string CreatePipeName(string prefix = "pipe")
     {
         var first = string.IsNullOrWhiteSpace(prefix) ? 'p' : char.ToLowerInvariant(prefix[0]);
@@ -16,6 +18,8 @@ public static class BaseTests
 
 #if NETFRAMEWORK
         const char target = '4';
+#elif NET10_0_OR_GREATER
+        const char target = 'a';
 #elif NET9_0_OR_GREATER
         const char target = '9';
 #elif NET8_0_OR_GREATER
@@ -24,7 +28,7 @@ public static class BaseTests
         const char target = 'n';
 #endif
 
-        return $"{first}{target}";
+        return $"{first}{target}{Interlocked.Increment(ref _pipeNameSequence):x}";
     }
 
     public static async Task DataTestAsync<T>(IPipeServer<T> server, IPipeClient<T> client, List<T> values, Func<T?, string>? hashFunc = null, CancellationToken cancellationToken = default)
